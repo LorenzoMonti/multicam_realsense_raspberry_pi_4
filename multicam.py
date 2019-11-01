@@ -2,7 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import logging
-
+import os
 
 # Configure depth and color streams...
 # from Camera 1
@@ -21,13 +21,11 @@ config_2.enable_device('123456789012') # add your serial number
 config_2.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 30)
 config_2.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
 
-
-# Start streaming from both cameras
-pipeline_1.start(config_1)
-pipeline_2.start(config_2)
-
 try:
-
+    # Start streaming from both cameras
+    pipeline_1.start(config_1)
+    pipeline_2.start(config_2)
+    
     # Skip 35 first frames to give the Auto-Exposure time to adjust
     for x in range(35):
         # Wait for a coherent pair of frames: depth and color
@@ -73,7 +71,10 @@ try:
     cv2.imwrite("my_depth_2.jpg",depth_colormap_2)
     print ("imges stored")
 
-
+except RuntimeError as e:
+    print("Error occurred:", e) # sometimes the pipeline and/or stream became busy, print error log
+    # os.system('sudo reboot -n') # and then reboot, if you want
+    
 finally:
 
     # Stop streaming
